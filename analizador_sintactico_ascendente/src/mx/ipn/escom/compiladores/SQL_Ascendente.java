@@ -1,6 +1,7 @@
  //Elaborado por: Ramirez Contreras Angel Humberto (5CV1) y Diaz Rosales Mauricio Yael (3CV15)
 package mx.ipn.escom.compiladores;
 
+import java.util.Scanner;
 import java.util.Stack;
 
 public class SQL_Ascendente {
@@ -15,7 +16,24 @@ public class SQL_Ascendente {
         // Inicializa las tablas de acción y desplazamiento (shift) y las tablas de estado-goto
         initializeTables();
     }
+    
+    
+    public static void main(String[] args) {
+        SQL_Ascendente parser = new SQL_Ascendente();
+        Scanner scanner = new Scanner(System.in);
 
+        System.out.print("Ingrese una cadena SQL: ");
+        String input = scanner.nextLine();
+
+        try {
+            parser.parse(input);
+            System.out.println("Analisis sintactico exitoso.");
+        } catch (SQL_Ascendente.Error_Sintaxis e) {
+            System.out.println("Error de sintaxis: " + e.getMessage());
+        }
+    }
+
+    
     public void parse(String input) throws Error_Sintaxis {
         int index = 0;
         stateStack.push(0);
@@ -49,21 +67,11 @@ public class SQL_Ascendente {
         }
     }
 
-    private void reduce(int production) {
+    private void reduce(int production) throws Error_Sintaxis {
         switch (production) {
-            case 1 -> {
-
-                System.out.println("Reducción de la cláusula SELECT");
-            }
-            case 2 -> {
-
-                System.out.println("Reducción de la cláusula FROM");
-            }
-            case 3 -> {
-
-                System.out.println("Reducción de la cláusula WHERE");
-            }
-
+            case 1 -> System.out.println("Reduccion de la clausula SELECT");
+            case 2 -> System.out.println("Reduccion de la clausula FROM");
+            case 3 -> System.out.println("Reduccion de la clausula WHERE");
         }
 
         int productionLength = getProductionLength(production);
@@ -78,15 +86,23 @@ public class SQL_Ascendente {
         symbolStack.push(String.valueOf(symbol));
     }
 
-    private int getSymbolIndex(char symbol) {
-        return switch (symbol) {
-            case 'S' -> 0;
-            case 'E' -> 1;
-            case 'F' -> 2;
-            case 'W' -> 3;
-            default -> -1;
-        }; // Símbolo no reconocido
+private int getSymbolIndex(char symbol) throws Error_Sintaxis {
+    switch (symbol) {
+        case 'S' -> {
+            return 0;
+            }
+        case 'E' -> {
+            return 1;
+            }
+        case 'F' -> {
+            return 2;
+            }
+        case 'W' -> {
+            return 3;
+            }
+        default -> throw new Error_Sintaxis("Simbolo no reconocido: " + symbol);
     }
+}
 
     // Retorna el símbolo no terminal para una producción
     private char getNonTerminalSymbol(int production) {
@@ -100,10 +116,39 @@ public class SQL_Ascendente {
     }
 
     private void initializeTables() {
-        throw new UnsupportedOperationException("No compatible.");
+        // Inicializa las tablas de acción y desplazamiento (shift) y las tablas de estado-goto
+
+        // Tabla de acción
+        actionTable = new int[][] {
+            // Estado 0
+            { 2, 0, 0, 0 }, // Acciones para los símbolos S, E, F, W 
+            // Estado 1
+            { 0, 3, 0, 0 }, // Acciones para los símbolos S, E, F, W 
+            // Estado 2
+            { 0, 0, 0, 0 }, // Acciones para los símbolos S, E, F, W 
+        };
+
+        // Tabla de estado-goto
+        gotoTable = new int[][] {
+            // Estado 0
+            { 1, 0, 0, 0 }, // Transiciones para los símbolos S, E, F, W
+            // Estado 1
+            { 0, 0, 0, 0 }, // Transiciones para los símbolos S, E, F, W
+        };
     }
 
     private int getProductionLength(int production) {
-        throw new UnsupportedOperationException("No compatible."); 
+        return switch (production) {
+            case 1 -> 1; // Longitud de la producción 1
+            case 2 -> 1; // Longitud de la producción 2
+            case 3 -> 1; // Longitud de la producción 3
+            default -> 0; // Producción no reconocida
+        };
+    }
+
+    private static class Error_Sintaxis extends Exception {
+        public Error_Sintaxis(String message) {
+            super(message);
+        }
     }
 }
